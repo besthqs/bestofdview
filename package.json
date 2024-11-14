@@ -1,0 +1,33 @@
+{
+  "name": "bestofdview",
+  "private": false,
+  "version": "0.2.4",
+  "description": "best ofdview",
+  "main": "./src/packages/index.ts",
+  "author": "houqingsong(besthqs@qq.com)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lapo/asn1js": "^2.0.4",
+    "core-js": "^3.38.1",
+    "js-md5": "^0.8.3",
+    "js-sha1": "^0.7.0",
+    "jsrsasign": "^11.1.0",
+    "jszip": "^3.10.1",
+    "jszip-utils": "^0.1.0",
+    "ofd-xml-parser": "^0.0.6",
+    "sm-crypto": "^0.3.13",
+    "vue": "^3.5.10",
+    "web-streams-polyfill": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.8",
+    "vue-tsc": "^2.1.6"
+  }
+}
