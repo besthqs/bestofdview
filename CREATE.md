@@ -1,5 +1,13 @@
 # 创建项目
 
+## 切换源
+
+```
+nrm ls
+nrm use npm
+nrm use taobao
+```
+
 ## 修改版本号
 
 - 发补丁版 npm version patch
@@ -9,3 +17,4 @@
 ## 发布到 npm
 
 - npm publish
+- besthqs@qq.com
