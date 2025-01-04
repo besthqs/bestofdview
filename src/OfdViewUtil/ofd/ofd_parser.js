@@ -19,11 +19,11 @@
  */
 
 import { pipeline } from "./pipeline";
-import * as JsZip from "jszip";
+import JsZip from "jszip";
 import { parseStBox, getExtensionByPath, replaceFirstSlash } from "./ofd_util";
 import { Jbig2Image } from "../jbig2/jbig2";
 import { parseSesSignature } from "./ses_signature_parser";
-import * as parser from "ofd-xml-parser";
+import parser from "ofd-xml-parser";
 
 export const unzipOfd = function (file) {
   return new Promise((resolve, reject) => {
