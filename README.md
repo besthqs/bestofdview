@@ -18,13 +18,41 @@ BestOfdview 是一款开源的 ofd 查看器，主要功能有：
 ### 安装
 
 ```
-
+npm i bestofdview
 ```
 
 ### 安装依赖
 
 ```
+npm i  jszip-utils jszip @lapo/asn1js sm-crypto ofd-xml-parser  js-md5 js-sha1 jsrsasign core-js web-streams-polyfill
+```
 
+### 使用
+
+创建 OfdView.vue 文件，并引入组件：
+
+```
+<template>
+  <div class="ofd-view-container">
+    <OfdView></OfdView>
+  </div>
+</template>
+<script setup lang="ts">
+import { OfdView } from 'bestofdview'
+import 'bestofdview/src/assets/main.css'
+import 'bestofdview/src/polyfills'
+import 'sm-crypto'
+import 'jsrsasign'
+import 'ofd-xml-parser'
+import 'jszip'
+import 'jszip-utils'
+</script>
+<style scoped>
+.ofd-view-container {
+  width: 100%;
+  height: 100vh;
+}
+</style>
 ```
 
 ### 贡献
