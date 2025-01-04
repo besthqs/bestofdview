@@ -35,10 +35,19 @@ import { ClassOfd } from "../../api/typeOfd";
 import OfdViewToolbarPage from "./OfdViewToolbarPage.vue";
 import OfdViewToolbarZoom from "./OfdViewToolbarZoom.vue";
 
+import "sm-crypto";
+import "jsrsasign";
+import "ofd-xml-parser";
+import "jszip";
+import "jszip-utils";
+import "js-md5";
+import "js-sha1";
+
 const props = withDefaults(
   defineProps<{
     showOpenFileButton?: boolean;
     ofdLink?: string;
+    sealClick?: Function;
   }>(),
   { showOpenFileButton: true }
 );
@@ -123,6 +132,15 @@ const OfdLoad = async () => {
           if (ofdObj.value) {
             for (const div of ofdObj.value.divs) {
               ob.observe(div);
+            }
+
+            for (const seal of ofdObj.value.seals) {
+              // seal.div_seal.addEventListener("click", props.sealClick(seal));
+              seal.div_seal.addEventListener("click", () => {
+                //console.log("sealClick", { ...seal });
+                if (props.sealClick)
+                  props.sealClick({ ...seal.ofdSignatureInfo });
+              });
             }
           }
         });

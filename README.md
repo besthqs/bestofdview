@@ -55,6 +55,12 @@ import 'jszip-utils'
 </style>
 ```
 
+| 参数               | 类型     | 说明                      | 默认值    |
+| ------------------ | -------- | ------------------------- | --------- |
+| showOpenFileButton | boolean  | 是否显示打开 ofd 文档按钮 | true      |
+| ofdLink            | string   | ofd 文档链接              | undefined |
+| sealClick          | Function | 给印章添加点击事件        | undefined |
+
 ### 贡献
 
 欢迎提交 PR，共建开源 ofd 查看器。
