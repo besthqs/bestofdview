@@ -193,10 +193,11 @@ export const renderPage = function (
         );
       } else if (stamp.type === "png") {
         const sealBoundary = converterBox(stamp.obj.boundary);
+        //侯庆松 添加 2025.1.6 如果有底纹，会导致覆盖印章，pfIndex = undefined, 所以需要判断是否有pfIndex
         const oid =
           (Array.isArray(stamp.stamp.stampAnnot)
             ? stamp.stamp.stampAnnot[0]["@_ID"]
-            : stamp.stamp.stampAnnot["@_ID"]) + fixIndex;
+            : stamp.stamp.stampAnnot["@_ID"]) + (fixIndex ?? 10000);
         const prawParam = Array.isArray(stamp.stamp.stampAnnot)
           ? stamp.stamp.stampAnnot[0]["@_DrawParam"]
           : stamp.stamp.stampAnnot["@_DrawParam"];
@@ -678,7 +679,8 @@ export const renderTextObject = function (
   const ctm = textObject["@_CTM"];
   const hScale = textObject["@_HScale"];
   const font = textObject["@_Font"];
-  const weight = textObject["@_Weight"];
+  // 侯庆松 2025.1.6 增加对字体的解析
+  const weight = textObject["@_Weight"] ?? "normal";
   const size = converterDpi(parseFloat(textObject["@_Size"]));
   let array = [];
   array = array.concat(textObject["ofd:TextCode"]);
