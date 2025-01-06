@@ -31,17 +31,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watchEffect, computed } from "vue";
 import { ClassOfd } from "../../api/typeOfd";
+import { debounce } from "../../utils/myfunc";
 
 import OfdViewToolbarPage from "./OfdViewToolbarPage.vue";
 import OfdViewToolbarZoom from "./OfdViewToolbarZoom.vue";
-
-import "sm-crypto";
-import "jsrsasign";
-import "ofd-xml-parser";
-import "jszip";
-import "jszip-utils";
-import "js-md5";
-import "js-sha1";
 
 const props = withDefaults(
   defineProps<{
@@ -112,55 +105,23 @@ const pageCount = ref(0);
 const pageIndex = computed(() => {
   return ofdObj.value?.pageIndex ?? 1;
 });
+
 const OfdLoad = async () => {
   if (ofd.value && refOfdMainDiv.value && refOfdContentDiv.value) {
     ofdObj.value = new ClassOfd(
       refOfdMainDiv.value,
       refOfdContentDiv.value,
-      domWidth.value as number
+      domWidth.value as number,
+      ob,
+      props.sealClick
     );
     await ofdObj.value.parse(ofd.value);
     pageCount.value = ofdObj.value.pageCount;
-    console.log("页码", ofdObj.value.pageCount);
     ofdObj.value.getDivs();
-    console.log("divs", ofdObj.value.divs.length);
     const contentDiv = refOfdContentDiv.value;
     if (contentDiv) {
       ofdPageDivsShow = new Map<number, boolean>();
-      ofdObj.value.displayOfdDiv().then(() => {
-        requestAnimationFrame(() => {
-          if (ofdObj.value) {
-            for (const div of ofdObj.value.divs) {
-              ob.observe(div);
-            }
-
-            for (const seal of ofdObj.value.seals) {
-              // seal.div_seal.addEventListener("click", props.sealClick(seal));
-              seal.div_seal.addEventListener("click", () => {
-                //console.log("sealClick", { ...seal });
-                const sealInfo = { ...seal.ofdSignatureInfo };
-                if (props.sealClick) props.sealClick(sealInfo);
-                else
-                  alert(
-                    `证书信息\n` +
-                      `签章人:${sealInfo.signer}\n` +
-                      `签章提供者:${sealInfo.provider}\n` +
-                      `原文摘要值:${sealInfo.hashedValue}\n` +
-                      `签名值:${sealInfo.signedValue}\n` +
-                      `签名算法:${sealInfo.signMethod}\n` +
-                      `版本号:${sealInfo.version}\n` +
-                      `印章标识:${sealInfo.sealID}\n` +
-                      `印章名称:${sealInfo.sealName}\n` +
-                      `印章类型:${sealInfo.sealType}\n` +
-                      `有效时间:${sealInfo.sealAuthTime}\n` +
-                      `制章日期:${sealInfo.sealMakeTime}\n` +
-                      `印章版本:${sealInfo.sealVersion}\n`
-                  );
-              });
-            }
-          }
-        });
-      });
+      ofdObj.value.displayOfdDiv();
     }
   }
 };
@@ -172,7 +133,6 @@ const handlePageInputChange = (event: Event) => {
 
 // 第一页
 const firstPage = () => {
-  console.log("firstPage");
   ofdObj.value?.firstPage();
 };
 
@@ -181,7 +141,6 @@ const prePage = () => {
 };
 
 const nextPage = () => {
-  console.log("nextPage");
   ofdObj.value?.nextPage();
 };
 
@@ -189,12 +148,20 @@ const lastPage = () => {
   ofdObj.value?.lastPage();
 };
 
+const zoomOutAction = () => {
+  if (ofdObj.value) ofdObj.value.zoomOut();
+};
+const debounce_zoomOut = debounce(zoomOutAction, ofdObj, 500);
 const zoomOut = () => {
-  ofdObj.value?.zoomOut();
+  debounce_zoomOut();
 };
 
+const zoomInAction = () => {
+  if (ofdObj.value) ofdObj.value.zoomIn();
+};
+const debounce_zoomIn = debounce(zoomInAction, ofdObj, 500);
 const zoomIn = () => {
-  ofdObj.value?.zoomIn();
+  debounce_zoomIn();
 };
 </script>
 
@@ -232,5 +199,10 @@ const zoomIn = () => {
   justify-content: center;
   background: #ededf0;
   overflow: hidden;
+}
+</style>
+<style>
+.ofd-view .ofd-Main .ofd-Container div[name="seal_img_div"]:hover {
+  background-color: rgba(255, 0, 0, 0.1);
 }
 </style>

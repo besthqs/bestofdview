@@ -52,14 +52,20 @@ export class ClassOfd {
   pageIndex: number = 1;
   scale = 0; //缩放比例
   seals: ISeal[] = []; // 签章信息
+  ob: IntersectionObserver;
+  sealClick?: Function;
   constructor(
     _ofdMainDiv: HTMLDivElement,
     _ofdContentDiv: HTMLDivElement,
-    _screenWidth: number
+    _screenWidth: number,
+    _ob: IntersectionObserver,
+    _sealClick?: Function
   ) {
     this.ofdMainDiv = _ofdMainDiv;
     this.ofdContentDiv = _ofdContentDiv;
     this.screenWidth = _screenWidth;
+    this.ob = _ob;
+    this.sealClick = _sealClick;
   }
   /**
    * 下载并解析ofd
@@ -68,11 +74,11 @@ export class ClassOfd {
    */
   parse(ofd: string | File) {
     return new Promise<void>((resolve, reject) => {
-      console.log("开始解析ofd文件...");
+      console.time("解析ofd文件");
       parseOfdDocument({
         ofd,
         success: (res: IOfdDocument[]) => {
-          console.log("解析成功", res);
+          console.timeEnd("解析ofd文件");
           this.ofdDocument = res[0];
           this.pageIndex = 1;
           // showOfdPages(res[0] as unknown as IOfdDocument, domWidth.value as number)
@@ -99,8 +105,14 @@ export class ClassOfd {
       this.scale = getPageScale();
       this.ofdContentDiv.innerHTML = "";
       this.seals = [];
+      let maxWidth = 0;
       requestAnimationFrame(() => {
         for (const div of this.divs) {
+          //计数每页div的最大宽度
+          const divWidth = parseInt(
+            div.style.width.substring(0, div.style.width.length - 2)
+          );
+          maxWidth = divWidth > maxWidth ? divWidth : maxWidth;
           this.ofdContentDiv.appendChild(div);
         }
         for (let ele of document.getElementsByName("seal_img_div")) {
@@ -116,6 +128,44 @@ export class ClassOfd {
             );
           }
         }
+
+        //留边，左右各 15
+        maxWidth += 30;
+        //如果容器小于每页宽度，就设置容器值
+        //容器的宽度，可以和每页宽度比较
+        const ofd_main_width: any = this.ofdMainDiv.clientWidth;
+        if (ofd_main_width < maxWidth)
+          this.ofdContentDiv.style.width = maxWidth + "px";
+        else this.ofdContentDiv.style.width = "";
+
+        //计算页码
+        for (const div of this.divs) {
+          this.ob.observe(div);
+        }
+        //点击印章
+        for (const seal of this.seals) {
+          seal.div_seal.addEventListener("click", () => {
+            const sealInfo = { ...seal.ofdSignatureInfo };
+            if (this.sealClick) this.sealClick(sealInfo);
+            else
+              alert(
+                `证书信息\n` +
+                  `签章人:${sealInfo.signer}\n` +
+                  `签章提供者:${sealInfo.provider}\n` +
+                  `原文摘要值:${sealInfo.hashedValue}\n` +
+                  `签名值:${sealInfo.signedValue}\n` +
+                  `签名算法:${sealInfo.signMethod}\n` +
+                  `版本号:${sealInfo.version}\n` +
+                  `印章标识:${sealInfo.sealID}\n` +
+                  `印章名称:${sealInfo.sealName}\n` +
+                  `印章类型:${sealInfo.sealType}\n` +
+                  `有效时间:${sealInfo.sealAuthTime}\n` +
+                  `制章日期:${sealInfo.sealMakeTime}\n` +
+                  `印章版本:${sealInfo.sealVersion}\n`
+              );
+          });
+        }
+
         resolve();
       });
     });
@@ -268,7 +318,6 @@ export class ClassOfd {
   }
   //跳转到指定页
   gotoPage(_pageIndex: number) {
-    //  const pageScrollCount = Math.abs(this.pageIndex - _pageIndex)
     this.pageIndex =
       _pageIndex < 1
         ? 1
@@ -281,16 +330,35 @@ export class ClassOfd {
   //放大
   zoomIn() {
     console.log("放大", this.scale);
+
     if (this.scale < 10) {
+      const _pgIndex = this.pageIndex;
       const _scale = Math.round(this.scale);
       this.scale = _scale <= this.scale ? _scale + 0.5 : _scale;
       setPageScale(this.scale);
       this.divs = renderOfdByScale(this.ofdDocument);
       this.displayOfdDiv();
-    }
+      this.gotoPage(1);
+      setTimeout(() => {
+        this.gotoPage(_pgIndex);
+      }, 10);
+    } else console.warn("已经是最大缩放比例了(<10)", this.scale);
   }
   //缩小
-  zoomOut() {}
+  zoomOut() {
+    if (this.scale > 1) {
+      const _pgIndex = this.pageIndex;
+      const _scale = Math.floor(this.scale);
+      this.scale = _scale >= this.scale ? _scale - 0.5 : _scale;
+      setPageScale(this.scale);
+      this.divs = renderOfdByScale(this.ofdDocument);
+      this.displayOfdDiv();
+      this.gotoPage(1);
+      setTimeout(() => {
+        this.gotoPage(_pgIndex);
+      }, 10);
+    } else console.warn("已经是最小缩放比例了(>1)", this.scale);
+  }
 
   /**
    * 获取ofd页面数量
