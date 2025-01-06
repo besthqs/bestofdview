@@ -18,3 +18,7 @@ nrm use taobao
 
 - npm publish
 - besthqs@qq.com
+
+## 查看包版本
+
+- npm view bestofdview version

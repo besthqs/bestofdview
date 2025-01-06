@@ -30,7 +30,7 @@ import {
   setPageScal,
   converterBox,
   setMaxPageScal,
-} from "./ofd_util";
+} from "./ofd_util.js";
 
 export const renderPageBox = function (screenWidth, pages, document) {
   const pageBoxs = [];
