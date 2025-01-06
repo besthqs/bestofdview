@@ -138,8 +138,24 @@ const OfdLoad = async () => {
               // seal.div_seal.addEventListener("click", props.sealClick(seal));
               seal.div_seal.addEventListener("click", () => {
                 //console.log("sealClick", { ...seal });
-                if (props.sealClick)
-                  props.sealClick({ ...seal.ofdSignatureInfo });
+                const sealInfo = { ...seal.ofdSignatureInfo };
+                if (props.sealClick) props.sealClick(sealInfo);
+                else
+                  alert(
+                    `证书信息\n` +
+                      `签章人:${sealInfo.signer}\n` +
+                      `签章提供者:${sealInfo.provider}\n` +
+                      `原文摘要值:${sealInfo.hashedValue}\n` +
+                      `签名值:${sealInfo.signedValue}\n` +
+                      `签名算法:${sealInfo.signMethod}\n` +
+                      `版本号:${sealInfo.version}\n` +
+                      `印章标识:${sealInfo.sealID}\n` +
+                      `印章名称:${sealInfo.sealName}\n` +
+                      `印章类型:${sealInfo.sealType}\n` +
+                      `有效时间:${sealInfo.sealAuthTime}\n` +
+                      `制章日期:${sealInfo.sealMakeTime}\n` +
+                      `印章版本:${sealInfo.sealVersion}\n`
+                  );
               });
             }
           }
