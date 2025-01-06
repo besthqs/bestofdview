@@ -1,9 +1,9 @@
 import { sm2 } from "sm-crypto";
-import { sm3 } from "./sm3";
+import { sm3 } from "./sm3.js";
 import md5 from "js-md5";
 import sha1 from "js-sha1";
 import rsa from "jsrsasign";
-import { Uint8ArrayToHexString } from "./ofd_util";
+import { Uint8ArrayToHexString } from "./ofd_util.js";
 import { Base64 } from "@lapo/asn1js/base64";
 
 export const digestByteArray = function (data, hashedBase64, checkMethod) {
