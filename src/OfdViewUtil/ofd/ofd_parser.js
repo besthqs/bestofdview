@@ -18,15 +18,11 @@
  *
  */
 
-import { pipeline } from "./pipeline.js";
+import { pipeline } from "./pipeline";
 import JsZip from "jszip";
-import {
-  parseStBox,
-  getExtensionByPath,
-  replaceFirstSlash,
-} from "./ofd_util.js";
-import { Jbig2Image } from "../jbig2/jbig2.js";
-import { parseSesSignature } from "./ses_signature_parser.js";
+import { parseStBox, getExtensionByPath, replaceFirstSlash } from "./ofd_util";
+import { Jbig2Image } from "../jbig2/jbig2";
+import { parseSesSignature } from "./ses_signature_parser";
 import parser from "ofd-xml-parser";
 
 export const unzipOfd = function (file) {

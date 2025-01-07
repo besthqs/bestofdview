@@ -18,11 +18,11 @@
  *
  */
 
-import { Hex } from "@lapo/asn1js/hex.js";
-import { Base64 } from "@lapo/asn1js/base64.js";
+import { Hex } from "@lapo/asn1js/hex";
+import { Base64 } from "@lapo/asn1js/base64";
 import { ASN1 } from "@lapo/asn1js";
-import { SES_Signature_Verify } from "./verify_signature_util.js";
-import { digestByteArray } from "./verify_signature_util.js";
+import { SES_Signature_Verify } from "./verify_signature_util";
+import { digestByteArray } from "./verify_signature_util";
 const reHex = /^\s*(?:[0-9A-Fa-f][0-9A-Fa-f]\s*)+$/;
 
 export const parseSesSignature = async function (zip, name) {

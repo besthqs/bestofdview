@@ -29,11 +29,11 @@
  "web-streams-polyfill": "^3.1.0",
  "x2js": "^3.4.0",
  */
-import { calPageBox, calPageBoxScale, renderPage } from "./ofd/ofd_render.js";
-import { pipeline } from "./ofd/pipeline.js";
-import { getDocRoots, parseSingleDoc, unzipOfd } from "./ofd/ofd_parser.js";
-import { digestCheckProcess } from "./ofd/ses_signature_parser.js";
-import { getPageScal, setPageScal } from "./ofd/ofd_util.js";
+import { calPageBox, calPageBoxScale, renderPage } from "./ofd/ofd_render";
+import { pipeline } from "./ofd/pipeline";
+import { getDocRoots, parseSingleDoc, unzipOfd } from "./ofd/ofd_parser";
+import { digestCheckProcess } from "./ofd/ses_signature_parser";
+import { getPageScal, setPageScal } from "./ofd/ofd_util";
 import * as JSZipUtils from "jszip-utils";
 
 export const parseOfdDocument = function (options) {
