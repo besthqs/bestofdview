@@ -39,6 +39,7 @@ npm i  jszip-utils jszip @lapo/asn1js sm-crypto ofd-xml-parser  js-md5 js-sha1 j
 <script setup lang="ts">
 import { OfdView } from 'bestofdview'
 import 'bestofdview/src/assets/main.css'
+import 'bestofdview/src/polyfills'
 import 'sm-crypto'
 import 'jsrsasign'
 import 'ofd-xml-parser'

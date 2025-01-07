@@ -56,8 +56,7 @@ export const parseOfdDocument = function (options) {
 const doParseOFD = function (options) {
   const start = new Date();
   console.log("doParseOfd.begin", options);
-  //global.xmlParseFlag = 0;
-  window.xmlParseFlag = 0;
+  global.xmlParseFlag = 0;
   pipeline
     .call(
       this,

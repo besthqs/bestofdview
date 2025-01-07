@@ -502,8 +502,7 @@ const getSignatureData = async function (zip, signature, signatureID) {
     data["json"]["ofd:Signature"]["ofd:SignedInfo"]["ofd:References"][
       "@_CheckMethod"
     ];
-  //global.toBeChecked = new Map();
-  window.toBeChecked = new Map();
+  global.toBeChecked = new Map();
   const arr = new Array();
   data["json"]["ofd:Signature"]["ofd:SignedInfo"]["ofd:References"][
     "ofd:Reference"
@@ -519,8 +518,7 @@ const getSignatureData = async function (zip, signature, signatureID) {
     const fileData = await getFileData(zip, key);
     arr.push({ fileData, hashed, checkMethod });
   });
-  //global.toBeChecked.set(signatureID, arr);
-  window.toBeChecked.set(signatureID, arr);
+  global.toBeChecked.set(signatureID, arr);
   return {
     stampAnnot:
       data["json"]["ofd:Signature"]["ofd:SignedInfo"]["ofd:StampAnnot"],
