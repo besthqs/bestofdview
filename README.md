@@ -2,6 +2,8 @@
 
 ## ofd 查看器
 
+### OFD 是由工业和信息化部软件司牵头中国电子技术标准化研究院成立的版式编写组制定的版式文档国家标准，属于中国的一种自主格式，要打破政府部门和党委机关电子公文格式不统一，以方便的进行电子文档的存储、读取以及编辑 。
+
 ### 介绍
 
 BestOfdview 是一款开源的 ofd 查看器，支持 vue3，主要功能有：
@@ -78,6 +80,12 @@ import 'js-sha1'
 | ofdLink            | string   | ofd 文档链接              | —      |
 | sealClick          | Function | 给印章添加点击事件        | —      |
 
+### 预览
+
+![image-20220316165332676](https://gitee.com/besthqs/image-hosting/raw/master/img/image-20220316165332676.png)
+
+![image-20220316165401622](https://gitee.com/besthqs/image-hosting/raw/master/img/image-20220316165401622.png)
+
 ### 贡献
 
-欢迎提交 PR，共建开源 ofd 查看器。
+欢迎提交 PR，共建开源 ofd 查看器。如果使用中出现问题，可以发邮件 [besthqs@qq.com](mailto:besthqs@qq.com)。
