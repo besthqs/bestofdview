@@ -82,9 +82,9 @@ import 'js-sha1'
 
 ### 预览
 
-![image-20220316165332676](https://gitee.com/besthqs/image-hosting/raw/master/img/image-20220316165332676.png)
+![打开ofd](https://github.com/besthqs/bestofdview/blob/main/src/assets/openofd.png?raw=true)
 
-![image-20220316165401622](https://gitee.com/besthqs/image-hosting/raw/master/img/image-20220316165401622.png)
+![ofd文件](https://github.com/besthqs/bestofdview/blob/main/src/assets/ofd999.png?raw=true)
 
 ### 贡献
 
