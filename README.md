@@ -14,6 +14,10 @@ BestOfdview 是一款开源的 ofd 查看器，支持 vue3，主要功能有：
 
 - [GitHub](https://github.com/besthqs/bestofdview)
 
+### 在线预览地址
+
+- [ofdview](https://hbhjpt.580168.net/ta/web/#/ofdview)
+
 ### 安装
 
 ```
