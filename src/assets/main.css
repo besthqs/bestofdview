@@ -18,6 +18,15 @@
 }
 
 .ofd-view-toolbar-icon:hover {
-
   background-color: #e6e6e6;
+}
+
+
+.ofd-view-toolbar-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  /* 这里可以添加一些禁用状态下的样式，例如颜色，边框等 */
+  color: grey;
+  /* border: 1px solid grey; */
+  /* 其他样式 */
 }

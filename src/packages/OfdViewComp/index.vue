@@ -21,7 +21,10 @@
         @nextPage="nextPage"
         @lastPage="lastPage"
       />
-      <OfdViewToolbarZoom @zoomOut="zoomOut" @zoomIn="zoomIn" />
+      <OfdViewToolbarZoom
+        :pageCount="pageCount"
+      @zoomOut="zoomOut" @zoomIn="zoomIn" />
+
     </div>
     <div class="ofd-Main" ref="refOfdMainDiv">
       <div class="ofd-Container" ref="refOfdContentDiv"></div>

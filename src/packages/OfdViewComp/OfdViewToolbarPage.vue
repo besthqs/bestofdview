@@ -1,9 +1,9 @@
 <template>
   <div class="tool-bar">
-    <div class="ofd-view-toolbar-icon" @click="$emit('firstPage')">
+    <div class="ofd-view-toolbar-icon" :class="{'ofd-view-toolbar-disabled': pageCount<2||pageIndex===1}"   title="第一页" @click="$emit('firstPage')">
       <i class="iconfont icon-left2" />
     </div>
-    <div class="ofd-view-toolbar-icon" @click="$emit('prePage')">
+    <div class="ofd-view-toolbar-icon" :class="{'ofd-view-toolbar-disabled':pageCount<2|| pageIndex===1 }"    title="前一页" @click="$emit('prePage')">
       <i class="iconfont icon-left" />
     </div>
     <div class="page-input" style="width: 100px">
@@ -16,10 +16,10 @@
       />
       <div>/{{ pageCount }}</div>
     </div>
-    <div class="ofd-view-toolbar-icon" @click="$emit('nextPage')">
+    <div class="ofd-view-toolbar-icon" :class="{'ofd-view-toolbar-disabled':pageCount<2|| pageIndex===pageCount }"   title="后一页"  @click="$emit('nextPage')">
       <i class="iconfont icon-right" />
     </div>
-    <div class="ofd-view-toolbar-icon" @click="$emit('lastPage')">
+    <div class="ofd-view-toolbar-icon" :class="{'ofd-view-toolbar-disabled':pageCount<2|| pageIndex===pageCount }"  title="最后一页" @click="$emit('lastPage')">
       <i class="iconfont icon-right2" />
     </div>
   </div>
@@ -60,4 +60,8 @@ const handlePageInputChange = (event: Event) => {
   margin: 0 3px;
   text-align: center;
 }
+
+
+
+
 </style>
