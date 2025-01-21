@@ -906,6 +906,7 @@ export const renderPathObject = function (
   if (pathObject["@_Fill"] && pathObject["@_Fill"] != "false") {
     // 侯庆松 添加  2024.11.14 底纹部分，使用了图片填充，导致显示黑块
     // 侯庆松 添加  2025.1.21 部分发票，完全使用svg填充，需要取资源中的FillColor
+    // 侯庆松 添加  2025.1.21 表格如果设置了底纹，本处显示时，去掉了底纹，需要判断 drawParam 是否有值
     path.setAttribute(
       "fill",
       //'none'
@@ -916,6 +917,8 @@ export const renderPathObject = function (
           ? defaultFillColor == "rgb(0, 0, 0)"
             ? "rgba(1,1,1,1)"
             : defaultFillColor
+          : drawParam === undefined
+          ? "none"
           : `rgb(${drawParamResObj[drawParam].FillColor})`
       }`
     );
