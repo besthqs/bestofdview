@@ -905,6 +905,7 @@ export const renderPathObject = function (
   }
   if (pathObject["@_Fill"] && pathObject["@_Fill"] != "false") {
     // 侯庆松 添加  2024.11.14 底纹部分，使用了图片填充，导致显示黑块
+    // 侯庆松 添加  2025.1.21 发票，完全使用svg填充，需要取资源中的FillColor
     path.setAttribute(
       "fill",
       //'none'
@@ -915,9 +916,10 @@ export const renderPathObject = function (
           ? defaultFillColor == "rgb(0, 0, 0)"
             ? "rgba(1,1,1,1)"
             : defaultFillColor
-          : "none"
+          : `rgb(${drawParamResObj[drawParam].FillColor})`
       }`
     );
+
     // if (isFillAxialShd) {
     //     path.setAttribute('fill', `url(#${pathObject['@_ID']})`);
     // }

@@ -206,6 +206,9 @@ const zoomIn = () => {
 </style>
 <style>
 .ofd-view .ofd-Main .ofd-Container div[name="seal_img_div"]:hover {
-  background-color: rgba(255, 0, 0, 0.1);
+  border: 2px dashed rgb(173, 173, 173, 173);
+}
+.ofd-view .ofd-Main .ofd-Container div[name="seal_img_div"]::after {
+  content: seal;
 }
 </style>
