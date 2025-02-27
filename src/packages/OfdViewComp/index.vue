@@ -1,17 +1,6 @@
 <template>
   <div class="ofd-view" ref="refOfdViewDiv">
     <div class="ofd-toolbar">
-      <div class="ofd-view-toolbar-icon">
-        <label>
-          <i class="iconfont icon-open" />
-          <input
-            style="display: none"
-            type="file"
-            accept=".ofd"
-            @change="handleFileChange"
-          />
-        </label>
-      </div>
       <OfdViewToolbarPage
         :pageIndex="pageIndex"
         :pageCount="pageCount"
@@ -20,35 +9,133 @@
         @handlePageInputChange="handlePageInputChange"
         @nextPage="nextPage"
         @lastPage="lastPage"
-      />
+      >
+        <label v-if="showOpenFileButton">
+          <i
+            class="iconfont icon-open ofd-open-file-btn"
+            title="打开.ofd文件"
+          />
+          <input
+            style="display: none"
+            type="file"
+            accept=".ofd"
+            @change="handleFileChange"
+          />
+        </label>
+      </OfdViewToolbarPage>
       <OfdViewToolbarZoom
         :pageCount="pageCount"
-      @zoomOut="zoomOut" @zoomIn="zoomIn" />
-
+        @zoomOut="zoomOut"
+        @zoomIn="zoomIn"
+        @setScale="setScale"
+      />
+      <OfdViewToolbarBtn
+        :pageCount="pageCount"
+        @toggleFullScreen="onToggleFullScreen"
+        @printOfd="onPrintOfd"
+        @downOfd="onDownOfd"
+        @showCertList="onShowCertList"
+      />
     </div>
     <div class="ofd-Main" ref="refOfdMainDiv">
       <div class="ofd-Container" ref="refOfdContentDiv"></div>
     </div>
+    <FullScreenLoading :visible="loadingVisible" text="正在加载，请稍候..." />
+    <MyDialog v-model:modelValue="showSealInfoDialog">
+      <template #header>
+        <h3>签章信息<span class="ofd-signature-info-valid">有效</span></h3>
+      </template>
+      <div class="ofd-signature-info" v-if="currentSealInfo">
+        <div>
+          <span>签章人:</span><span>{{ currentSealInfo.signer }}</span>
+        </div>
+        <div>
+          <span>签章日期:</span><span>{{ currentSealInfo.signDate }}</span>
+        </div>
+        <div>
+          <span>版本号:</span><span>{{ currentSealInfo.version }}</span>
+        </div>
+        <div>
+          <span>印章标识:</span><span>{{ currentSealInfo.sealID }}</span>
+        </div>
+        <div>
+          <span>印章名称:</span><span>{{ currentSealInfo.sealName }}</span>
+        </div>
+        <div>
+          <span>印章类型:</span><span>{{ currentSealInfo.sealType }}</span>
+        </div>
+        <div>
+          <span>有效时间:</span
+          ><span
+            >从{{ utcToLocal(currentSealInfo.sealValidStart) }}至{{
+              utcToLocal(currentSealInfo.sealValidEnd)
+            }}</span
+          >
+        </div>
+        <div>
+          <span>印章版本:</span><span>{{ currentSealInfo.sealVersion }}</span>
+        </div>
+      </div>
+    </MyDialog>
+    <MyDialog v-model:modelValue="showCertListDialog">
+      <template #header>
+        <h3>
+          签章数量:<span class="ofd-signature-info-valid">{{
+            ofdObj?.seals.length || 0
+          }}</span>
+        </h3>
+      </template>
+      <div class="ofd-signature-list" v-if="ofdObj">
+        <div v-for="(seal, index) of ofdObj.seals" :key="'seal' + index">
+          <div>{{ seal.ofdSignatureInfo.signer }}</div>
+          <div>第{{ seal.pageNumber }}页</div>
+        </div>
+      </div>
+    </MyDialog>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted, watchEffect, computed } from "vue";
-import { ClassOfd } from "../../api/typeOfd";
-import { debounce } from "../../utils/myfunc";
+import { ClassOfd, type IOfdSignatureInfo } from "../../api/typeOfd";
+import {
+  debounce,
+  utcToLocal,
+  toggleFullScreen,
+  printOfd,
+} from "../../utils/myfunc";
 
 import OfdViewToolbarPage from "./OfdViewToolbarPage.vue";
 import OfdViewToolbarZoom from "./OfdViewToolbarZoom.vue";
+import OfdViewToolbarBtn from "./OfdViewToolbarBtn.vue";
+import FullScreenLoading from "./FullScreenLoading.vue";
+import MyDialog from "./MyDialog.vue";
 
 const props = withDefaults(
   defineProps<{
     showOpenFileButton?: boolean;
     ofdLink?: string;
-    sealClick?: Function;
+    sealClick?: (sealInfo: IOfdSignatureInfo) => void;
   }>(),
-  { showOpenFileButton: true }
+  {
+    showOpenFileButton: true,
+  }
 );
 
+const loadingVisible = ref(false);
+const showSealInfoDialog = ref(false);
+const currentSealInfo = ref<IOfdSignatureInfo>();
+
+const onSealClick = (sealInfo: IOfdSignatureInfo) => {
+  console.log("onSealClick", sealInfo);
+  if (props.sealClick) props.sealClick(sealInfo);
+  else {
+    currentSealInfo.value = sealInfo;
+    showSealInfoDialog.value = true;
+  }
+};
+
 const domWidth = ref<number | null>(null);
+const screenWidth = ref(document.body.clientWidth);
 const refOfdViewDiv = ref<HTMLDivElement>();
 
 onMounted(() => {
@@ -86,10 +173,13 @@ const ob = new IntersectionObserver((entries) => {
 const ofd = ref<string | File>();
 const ofdObj = ref<ClassOfd>();
 watchEffect(() => {
+  console.log("ofd.watchEffect", props.ofdLink);
   if (props.ofdLink) {
     ofd.value = props.ofdLink;
     //  viewOfd()
-    OfdLoad();
+    Promise.resolve().then(() => {
+      OfdLoad();
+    });
   }
 });
 
@@ -111,12 +201,14 @@ const pageIndex = computed(() => {
 
 const OfdLoad = async () => {
   if (ofd.value && refOfdMainDiv.value && refOfdContentDiv.value) {
+    loadingVisible.value = true;
     ofdObj.value = new ClassOfd(
       refOfdMainDiv.value,
       refOfdContentDiv.value,
       domWidth.value as number,
+      screenWidth.value as number,
       ob,
-      props.sealClick
+      onSealClick
     );
     await ofdObj.value.parse(ofd.value);
     pageCount.value = ofdObj.value.pageCount;
@@ -124,8 +216,10 @@ const OfdLoad = async () => {
     const contentDiv = refOfdContentDiv.value;
     if (contentDiv) {
       ofdPageDivsShow = new Map<number, boolean>();
-      ofdObj.value.displayOfdDiv();
-    }
+      ofdObj.value.displayOfdDiv().finally(() => {
+        loadingVisible.value = false;
+      });
+    } else loadingVisible.value = false;
   }
 };
 
@@ -152,19 +246,68 @@ const lastPage = () => {
 };
 
 const zoomOutAction = () => {
-  if (ofdObj.value) ofdObj.value.zoomOut();
+  if (ofdObj.value) {
+    ofdObj.value.zoomOut().then(() => {
+      loadingVisible.value = false;
+    });
+  } else loadingVisible.value = false;
 };
 const debounce_zoomOut = debounce(zoomOutAction, ofdObj, 500);
 const zoomOut = () => {
+  loadingVisible.value = true;
   debounce_zoomOut();
 };
 
 const zoomInAction = () => {
-  if (ofdObj.value) ofdObj.value.zoomIn();
+  if (ofdObj.value)
+    ofdObj.value.zoomIn().then(() => {
+      loadingVisible.value = false;
+    });
+  else loadingVisible.value = false;
 };
 const debounce_zoomIn = debounce(zoomInAction, ofdObj, 500);
 const zoomIn = () => {
+  loadingVisible.value = true;
   debounce_zoomIn();
+};
+
+const setScale = (scale: number) => {
+  loadingVisible.value = true;
+  requestAnimationFrame(() => {
+    if (ofdObj.value) {
+      ofdObj.value.setScale(scale).finally(() => {
+        loadingVisible.value = false;
+      });
+    }
+  });
+};
+
+const onToggleFullScreen = () => {
+  if (refOfdViewDiv.value) toggleFullScreen(refOfdViewDiv.value);
+};
+
+const onPrintOfd = () => {
+  if (refOfdContentDiv.value) printOfd(refOfdContentDiv.value);
+};
+
+const onDownOfd = () => {
+  if (ofd.value && typeof ofd.value === "string") {
+    const a = document.createElement("a");
+    a.href = ofd.value;
+    a.download = "my.ofd";
+    a.click();
+  } else if (ofd.value && typeof ofd.value === "object") {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(ofd.value);
+    a.download = "my.ofd";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+};
+
+const showCertListDialog = ref(false);
+const onShowCertList = () => {
+  showCertListDialog.value = true;
 };
 </script>
 
@@ -185,6 +328,7 @@ const zoomIn = () => {
   line-height: 40px;
   background-color: #f7f7f7;
   align-items: center;
+  justify-content: space-between;
 }
 
 .ofd-view .ofd-Main {
@@ -192,6 +336,8 @@ const zoomIn = () => {
   height: calc(100% - 40px);
   overflow: scroll;
   background: #ededf0;
+  position: relative;
+  z-index: 100;
 }
 
 .ofd-view .ofd-Main .ofd-Container {
@@ -203,10 +349,36 @@ const zoomIn = () => {
   background: #ededf0;
   overflow: hidden;
 }
+.ofd-open-file-btn {
+  cursor: pointer;
+}
+.ofd-signature-info div span:first-child {
+  width: 100px;
+  display: inline-block;
+}
+.ofd-signature-info-valid {
+  color: green;
+  margin-left: 5px;
+}
+.ofd-signature-list {
+  max-height: 50vh;
+  overflow: scroll;
+}
+
+.ofd-signature-list > div {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 30px;
+}
+.ofd-signature-list > div > div:last-child {
+  width: 100px;
+  text-align: center;
+}
 </style>
 <style>
 .ofd-view .ofd-Main .ofd-Container div[name="seal_img_div"]:hover {
   border: 2px dashed rgb(173, 173, 173, 173);
+  opacity: 0.7;
 }
 .ofd-view .ofd-Main .ofd-Container div[name="seal_img_div"]::after {
   content: seal;

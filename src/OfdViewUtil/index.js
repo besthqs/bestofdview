@@ -160,7 +160,7 @@ export const digestCheck = function (options) {
 };
 
 export const setPageScale = function (scale) {
-  console.log("setPageScale", scale);
+  console.log("setPageScale", scale, new Date().toLocaleString());
   setPageScal(scale);
 };
 

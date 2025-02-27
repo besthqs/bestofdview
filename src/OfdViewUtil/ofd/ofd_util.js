@@ -174,7 +174,7 @@ export const setPageScal = function (scale) {
   // scale = Math.ceil(scale);
   Scale = scale > 1 ? scale : 1;
   Scale = Scale > 10 ? 10 : Scale;
-  console.warn("setPageScal", scale, Scale);
+  console.warn("setPageScal", scale, Scale, new Date().toLocaleString());
 };
 
 export const getPageScal = function () {

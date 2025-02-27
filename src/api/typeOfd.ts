@@ -27,13 +27,16 @@ interface IOfdPage {
 export interface IOfdSignatureInfo {
   signer: string;
   provider: string;
+  //签章日期
+  signDate: string;
   hashedValue: string;
   signedValue: string;
   signMethod: string;
   sealID: string;
   sealName: string;
   sealType: string;
-  sealAuthTime: string;
+  sealValidStart: string;
+  sealValidEnd: string;
   sealMakeTime: string;
   sealVersion: string;
   version: string;
@@ -41,9 +44,11 @@ export interface IOfdSignatureInfo {
 export interface ISeal {
   div_seal: HTMLElement;
   ofdSignatureInfo: IOfdSignatureInfo;
+  pageNumber: number;
 }
 
 export class ClassOfd {
+  domWidth: number;
   screenWidth: number;
   ofdDocument: IOfdDocument | null = null;
   ofdMainDiv: HTMLDivElement;
@@ -53,16 +58,18 @@ export class ClassOfd {
   scale = 0; //缩放比例
   seals: ISeal[] = []; // 签章信息
   ob: IntersectionObserver;
-  sealClick?: Function;
+  sealClick: (sealInfo: IOfdSignatureInfo) => void;
   constructor(
     _ofdMainDiv: HTMLDivElement,
     _ofdContentDiv: HTMLDivElement,
+    _domWidth: number,
     _screenWidth: number,
     _ob: IntersectionObserver,
-    _sealClick?: Function
+    _sealClick: (sealInfo: IOfdSignatureInfo) => void
   ) {
     this.ofdMainDiv = _ofdMainDiv;
     this.ofdContentDiv = _ofdContentDiv;
+    this.domWidth = _domWidth;
     this.screenWidth = _screenWidth;
     this.ob = _ob;
     this.sealClick = _sealClick;
@@ -95,7 +102,7 @@ export class ClassOfd {
    * 将ofdDocument渲染成divs
    */
   getDivs() {
-    this.divs = renderOfd(this.screenWidth, this.ofdDocument);
+    this.divs = renderOfd(this.domWidth, this.ofdDocument);
   }
   /**
    * 显示ofdDiv
@@ -145,10 +152,11 @@ export class ClassOfd {
         //点击印章
         for (const seal of this.seals) {
           seal.div_seal.addEventListener("click", () => {
-            const sealInfo = { ...seal.ofdSignatureInfo };
-            if (this.sealClick) this.sealClick(sealInfo);
-            else
-              alert(
+            const sealInfo: IOfdSignatureInfo = { ...seal.ofdSignatureInfo };
+            //if (this.sealClick)
+            this.sealClick(sealInfo);
+            //else
+            /* alert(
                 `证书信息\n` +
                   `签章人:${sealInfo.signer}\n` +
                   `签章提供者:${sealInfo.provider}\n` +
@@ -162,10 +170,9 @@ export class ClassOfd {
                   `有效时间:${sealInfo.sealAuthTime}\n` +
                   `制章日期:${sealInfo.sealMakeTime}\n` +
                   `印章版本:${sealInfo.sealVersion}\n`
-              );
+              );*/
           });
         }
-
         resolve();
       });
     });
@@ -177,12 +184,17 @@ export class ClassOfd {
     SES_Signature: any,
     signedInfo: any
   ): ISeal {
+    const pageNumber = parseInt(
+      div.parentElement?.getAttribute("data-page-number") as string
+    );
     if (SES_Signature.realVersion < 4) {
       return {
+        pageNumber,
         div_seal: div,
         ofdSignatureInfo: {
           signer: SES_Signature.toSign.cert["commonName"].str,
           provider: signedInfo.Provider["@_ProviderName"],
+          signDate: signedInfo["SignatureDateTime"],
           hashedValue: SES_Signature.toSign.dataHash.replace(/\n/g, ""),
           signedValue: SES_Signature.signature.replace(/\n/g, ""),
           signMethod: SES_Signature.toSign.signatureAlgorithm.replace(
@@ -192,11 +204,9 @@ export class ClassOfd {
           sealID: SES_Signature.toSign.eseal.esealInfo.esID.str,
           sealName: SES_Signature.toSign.eseal.esealInfo.property.name.str,
           sealType: SES_Signature.toSign.eseal.esealInfo.property.type,
-          sealAuthTime:
-            "从 " +
-            SES_Signature.toSign.eseal.esealInfo.property.validStart +
-            " 到 " +
-            SES_Signature.toSign.eseal.esealInfo.property.validEnd,
+          sealValidStart:
+            SES_Signature.toSign.eseal.esealInfo.property.validStart,
+          sealValidEnd: SES_Signature.toSign.eseal.esealInfo.property.validEnd,
           sealMakeTime:
             SES_Signature.toSign.eseal.esealInfo.property.createDate,
           sealVersion: SES_Signature.toSign.eseal.esealInfo.header.version,
@@ -205,21 +215,21 @@ export class ClassOfd {
       };
     } else {
       return {
+        pageNumber,
         div_seal: div,
         ofdSignatureInfo: {
           signer: SES_Signature.cert["commonName"].str,
           provider: signedInfo.Provider["@_ProviderName"],
+          signDate: signedInfo["SignatureDateTime"],
           hashedValue: SES_Signature.toSign.dataHash.replace(/\n/g, ""),
           signedValue: SES_Signature.signature.replace(/\n/g, ""),
           signMethod: SES_Signature.signatureAlgID.replace(/\n/g, ""),
           sealID: SES_Signature.toSign.eseal.esealInfo.esID.str,
           sealName: SES_Signature.toSign.eseal.esealInfo.property.name.str,
           sealType: SES_Signature.toSign.eseal.esealInfo.property.type,
-          sealAuthTime:
-            "从 " +
-            SES_Signature.toSign.eseal.esealInfo.property.validStart +
-            " 到 " +
-            SES_Signature.toSign.eseal.esealInfo.property.validEnd,
+          sealValidStart:
+            SES_Signature.toSign.eseal.esealInfo.property.validStart,
+          sealValidEnd: SES_Signature.toSign.eseal.esealInfo.property.validEnd,
           sealMakeTime:
             SES_Signature.toSign.eseal.esealInfo.property.createDate,
           sealVersion: SES_Signature.toSign.eseal.esealInfo.header.version,
@@ -329,37 +339,61 @@ export class ClassOfd {
   }
   //放大
   zoomIn() {
-    console.log("放大", this.scale);
-
-    if (this.scale < 10) {
-      const _pgIndex = this.pageIndex;
-      const _scale = Math.round(this.scale);
-      this.scale = _scale <= this.scale ? _scale + 0.5 : _scale;
-      setPageScale(this.scale);
-      this.divs = renderOfdByScale(this.ofdDocument);
-      this.displayOfdDiv();
-      this.gotoPage(1);
-      setTimeout(() => {
-        this.gotoPage(_pgIndex);
-      }, 10);
-    } else console.warn("已经是最大缩放比例了(<10)", this.scale);
+    return new Promise<void>((resolve) => {
+      if (this.scale < 10) {
+        const _pgIndex = this.pageIndex;
+        const _scale = Math.round(this.scale);
+        this.scale = _scale <= this.scale ? _scale + 0.5 : _scale;
+        setPageScale(this.scale);
+        this.divs = renderOfdByScale(this.ofdDocument);
+        this.displayOfdDiv().then(() => {
+          this.gotoPage(_pgIndex);
+          resolve();
+        });
+      } else {
+        console.warn("已经是最大缩放比例了(<10)", this.scale);
+        resolve();
+      }
+    });
   }
   //缩小
   zoomOut() {
-    if (this.scale > 1) {
-      const _pgIndex = this.pageIndex;
-      const _scale = Math.floor(this.scale);
-      this.scale = _scale >= this.scale ? _scale - 0.5 : _scale;
-      setPageScale(this.scale);
-      this.divs = renderOfdByScale(this.ofdDocument);
-      this.displayOfdDiv();
-      this.gotoPage(1);
-      setTimeout(() => {
-        this.gotoPage(_pgIndex);
-      }, 10);
-    } else console.warn("已经是最小缩放比例了(>1)", this.scale);
+    return new Promise<void>((resolve) => {
+      if (this.scale > 1) {
+        const _pgIndex = this.pageIndex;
+        const _scale = Math.floor(this.scale);
+        this.scale = _scale >= this.scale ? _scale - 0.5 : _scale;
+        setPageScale(this.scale);
+        this.divs = renderOfdByScale(this.ofdDocument);
+        this.displayOfdDiv().then(() => {
+          this.gotoPage(_pgIndex);
+          resolve();
+        });
+      } else {
+        console.warn("已经是最小缩放比例了(>1)", this.scale);
+        resolve();
+      }
+    });
   }
-
+  // 修改缩放比例
+  setScale(scale: number) {
+    return new Promise<void>((resolve) => {
+      const _pgIndex = this.pageIndex;
+      if (scale === 0) {
+        this.divs = renderOfd(this.domWidth, this.ofdDocument);
+      } else if (scale === 0.5) {
+        this.divs = renderOfd(this.screenWidth, this.ofdDocument);
+      } else {
+        this.scale = scale;
+        setPageScale(scale);
+        this.divs = renderOfdByScale(this.ofdDocument);
+      }
+      this.displayOfdDiv().then(() => {
+        this.gotoPage(_pgIndex);
+        resolve();
+      });
+    });
+  }
   /**
    * 获取ofd页面数量
    */
