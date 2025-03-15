@@ -77,7 +77,6 @@ export const doGetDocRoot = async function (zip, docbody) {
           stamp.stampAnnot.boundary = parseStBox(
             stamp.stampAnnot["@_Boundary"]
           );
-          //console.log(stamp.stampAnnot.boundary)
           stamp.stampAnnot.pageRef = stamp.stampAnnot["@_PageRef"];
           if (!stampAnnotArray[stamp.stampAnnot["@_PageRef"]]) {
             stampAnnotArray[stamp.stampAnnot["@_PageRef"]] = [];
@@ -387,7 +386,16 @@ const getMultiMediaRes = async function (zip, res, doc) {
   const multiMediaResObj = {};
   if (multiMedias) {
     let array = [];
-    array = array.concat(multiMedias["ofd:MultiMedia"]);
+    //array = array.concat(multiMedias["ofd:MultiMedia"]);
+    //2025.3.14 侯庆松，由于部分发票不规范，导致解析失败，增加了对发票图片的判断，只保留正确格式的图片
+    if (Array.isArray(multiMedias)) {
+      for (const media of multiMedias) {
+        if (media["ofd:MultiMedia"]) {
+          array = array.concat(media["ofd:MultiMedia"]);
+        }
+      }
+    } else array = array.concat(multiMedias["ofd:MultiMedia"]);
+
     for (const item of array) {
       if (item) {
         let file = item["ofd:MediaFile"];
