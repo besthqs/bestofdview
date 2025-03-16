@@ -968,8 +968,16 @@ export const renderPathObject = function (
   }
   path.setAttribute("d", d);
   svg.appendChild(path);
-  const width = isStampAnnot ? boundary.w : Math.ceil(boundary.w);
-  const height = isStampAnnot ? boundary.h : Math.ceil(boundary.h);
+  const width = isStampAnnot
+    ? boundary.w
+    : Math.ceil(boundary.w)
+    ? Math.ceil(boundary.w)
+    : defaultLineWith;
+  const height = isStampAnnot
+    ? boundary.h
+    : Math.ceil(boundary.h)
+    ? Math.ceil(boundary.h)
+    : defaultLineWith;
   const left = boundary.x;
   const top = boundary.y;
   svg.setAttribute(
