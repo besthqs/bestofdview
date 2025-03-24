@@ -3,7 +3,7 @@
   "private": false,
   "version": "0.4.0",
   "description": "best ofdview",
-  "main": "./dist/best-ofdview.es.js",
+  "main": "dist/best-ofdview.es.js",
   "author": "houqingsong(besthqs@qq.com)",
   "type": "module",
   "scripts": {
