@@ -1,7 +1,7 @@
 {
   "name": "bestofdview",
   "private": false,
-  "version": "0.3.17",
+  "version": "0.4.0",
   "description": "best ofdview",
   "main": "./dist/best-ofdview.es.js",
   "author": "houqingsong(besthqs@qq.com)",
