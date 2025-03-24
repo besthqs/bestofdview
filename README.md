@@ -26,13 +26,39 @@ BestOfdview 是一款开源的 ofd 查看器，支持 vue3，主要功能有：
 npm i bestofdview
 ```
 
-### 安装依赖
+### 使用（>=0.4.0）
+
+```
+<template>
+  <div class="ofd-view-container">
+    <OfdView
+      :showOpenFileButton="showOpenFileButton"
+      :ofdLink="ofdLink"
+    ></OfdView>
+  </div>
+</template>
+<script setup lang="ts">
+import { OfdView } from "bestofdview";
+import "bestofdview/dist/style.css";
+
+defineProps<{ showOpenFileButton: boolean; ofdLink?: string }>();
+</script>
+<style scoped>
+.ofd-view-container {
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+```
+
+### 安装依赖 (<0.4.0 需要安装依赖)
 
 ```
 npm i  jszip-utils jszip @lapo/asn1js sm-crypto ofd-xml-parser  js-md5 js-sha1 jsrsasign core-js web-streams-polyfill
 ```
 
-### 使用
+### 使用（<0.4.0 按如下方式安装）
 
 创建 src/views/OfdView.vue 文件，并引入组件：
 
@@ -62,7 +88,7 @@ import 'js-sha1'
 </style>
 ```
 
-添加路由：src/router/index.ts 中添加路由：
+### 添加路由：src/router/index.ts 中添加路由：
 
 ```
 {
@@ -98,3 +124,4 @@ import 'js-sha1'
 - 2025.2.27(0.3.15) 工具栏增加了按比例显示功能、全屏、打印、下载、证书列表按钮
 - 2025.3.15(0.3.16) 解决部分发票无法显示图片的问题
 - 2025.3.16(0.3.17) 解决部分发票无法显示表格线的问题
+- 2025.3.24(0.4.0) 原来版本只支持 vite 项目，现在支持 webpack 项目，并且支持 vue3
